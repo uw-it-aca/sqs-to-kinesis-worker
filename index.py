@@ -20,9 +20,7 @@ def handler(event, context):
                 events.append(message['Body'])
 
             stream_name = getKinesisName()
-
-            for event in events:
-                pushToKinesis(event, stream_name)
+            pushToKinesis(events, stream_name)
 
             deleteSQSMessages(response)
 
@@ -48,12 +46,17 @@ def pollSQS():
     )
 
 
-def pushToKinesis(event, stream_name):
+def pushToKinesis(events, stream_name):
+    records = []
+
+    for event in events:
+        records.append({
+            'Data': json.dumps(event)
+        })
+
     kinesis_client.put_record(
         DeliveryStreamName=stream_name,
-        Record={
-            'Data': json.dumps(event)
-        }
+        Record=records
     )
 
 
