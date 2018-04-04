@@ -51,12 +51,12 @@ def pushToKinesis(events, stream_name):
 
     for event in events:
         records.append({
-            'Data': json.dumps(event)
+            'Data': event
         })
 
-    kinesis_client.put_record(
+    kinesis_client.put_record_batch(
         DeliveryStreamName=stream_name,
-        Record=records
+        Records=records
     )
 
 
