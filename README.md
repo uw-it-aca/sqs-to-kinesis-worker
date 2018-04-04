@@ -20,7 +20,7 @@ This sample includes:
 
 
 What Do I Do Next?
-------------------
+------------------ 
 
 If you have checked out a local copy of your repository you can start making changes
 to the sample code.  We suggest making a small change to index.py first, so you can
