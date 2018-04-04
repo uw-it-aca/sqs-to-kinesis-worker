@@ -47,7 +47,7 @@ def pollSQS():
 def pushToKinesis(event, stream_name):
     kinesis_client.put_record(
         StreamName=stream_name,
-        data=json.dumps(event),
+        Data=json.dumps(event),
         PartitionKey='dummykey'
     )
 
