@@ -1,6 +1,7 @@
 import json
 import os
 import boto3
+import time
 
 sqs_client = boto3.client('sqs', region_name='us-west-2')
 kinesis_client = boto3.client('firehose', region_name='us-west-2')
@@ -9,18 +10,21 @@ kinesis_client = boto3.client('firehose', region_name='us-west-2')
 def handler(event, context):
 
     try:
-        response = pollSQS()
-        events = []
+        lambda_end = time.time() + 60
 
-        for message in response['Messages']:
-            events.append(message['Body'])
+        while time.time() < lambda_end:
+            response = pollSQS()
+            events = []
 
-        stream_name = getKinesisName()
+            for message in response['Messages']:
+                events.append(message['Body'])
 
-        for event in events:
-            pushToKinesis(event, stream_name)
+            stream_name = getKinesisName()
 
-        deleteSQSMessages(response)
+            for event in events:
+                pushToKinesis(event, stream_name)
+
+            deleteSQSMessages(response)
 
     except Exception as ex:
         return {
@@ -48,7 +52,7 @@ def pushToKinesis(event, stream_name):
     kinesis_client.put_record(
         DeliveryStreamName=stream_name,
         Record={
-            'Data' : json.dumps(event)
+            'Data': json.dumps(event)
         }
     )
 
