@@ -9,11 +9,18 @@ kinesis_client = boto3.client('kinesis')
 def handler(event, context):
 
     try:
-        events = pollSQS()
+        response = pollSQS()
+        events = []
+
+        for message in response['Messages']:
+            events.append(message['Body'])
+
         stream_name = getKinesisName()
 
         for event in events:
             pushToKinesis(event, stream_name)
+
+        deleteSQSMessages(response)
 
     except Exception as ex:
         return {
@@ -31,18 +38,10 @@ def pollSQS():
     """
     Polls SQS for events, returns a list of strings (the SQS payloads)
     """
-
-    response = sqs_client.receive_message(
+    return sqs_client.receive_message(
         QueueUrl=getSQSURL(),
         MaxNumberOfMessages=10
     )
-
-    events = []
-
-    for message in response['Messages']:
-        events.append(message['body'])
-
-    return events
 
 
 def pushToKinesis(event, stream_name):
@@ -59,3 +58,18 @@ def getSQSURL():
 
 def getKinesisName():
     return os.getenv("KINESIS_STREAM_NAME")
+
+
+def deleteSQSMessages(response):
+    entries = []
+
+    for message in response['Messages']:
+        entries.append({
+            'Id': message['MessageId'],
+            'ReceiptHandle': message['ReceiptHandle']
+        })
+
+    sqs_client.delete_message_batch(
+        QueueUrl=getSQSURL(),
+        Entries=entries
+    )
