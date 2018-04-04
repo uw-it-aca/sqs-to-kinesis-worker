@@ -33,8 +33,8 @@ def pollSQS():
     """
 
     response = sqs_client.receive_message(
-        QueueURL=getSQSURL(),
-        maxNumberOfMessages=10
+        QueueUrl=getSQSURL(),
+        MaxNumberOfMessages=10
     )
 
     events = []
