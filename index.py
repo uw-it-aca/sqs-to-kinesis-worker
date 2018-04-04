@@ -1,15 +1,19 @@
 import json
-import datetime
+import os
+import boto3
+
+sqs_client = boto3.client('sqs')
+kinesis_client = boto3.client('kinesis')
 
 
 def handler(event, context):
 
     try:
         events = pollSQS()
-        kinesis_objects = formatKinesisEvents(events)
+        stream_name = getKinesisName()
 
-        for object in kinesis_objects:
-            pushToKinesis(object)
+        for event in events:
+            pushToKinesis(event, stream_name)
 
     except Exception as ex:
         return {
@@ -24,20 +28,34 @@ def handler(event, context):
 
 
 def pollSQS():
-    pass
+    """
+    Polls SQS for events, returns a list of strings (the SQS payloads)
+    """
+
+    response = sqs_client.receive_message(
+        QueueURL=getSQSURL(),
+        maxNumberOfMessages=10
+    )
+
+    events = []
+
+    for message in response['Messages']:
+        events.append(message['body'])
+
+    return events
 
 
-def formatKinesisEvents(events):
-    pass
-
-
-def pushToKinesis(event):
-    pass
+def pushToKinesis(event, stream_name):
+    kinesis_client.put_record(
+        StreamName=stream_name,
+        data=json.dumps(event),
+        PartitionKey='dummykey'
+    )
 
 
 def getSQSURL():
-    pass
+    return os.getenv("SQS_URL")
 
 
-def getKinesisURL():
-    pass
+def getKinesisName():
+    return os.getenv("KINESIS_URL")

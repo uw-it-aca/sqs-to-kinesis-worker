@@ -7,6 +7,8 @@ phases:
       # Upgrade AWS CLI to the latest version
       - pip install --upgrade awscli
 
+      - pip install boto3
+
   pre_build:
     commands:
 
