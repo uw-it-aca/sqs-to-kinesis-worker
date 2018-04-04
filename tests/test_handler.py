@@ -20,7 +20,7 @@ class TestConfigs(unittest.TestCase):
 
         for case in values:
             with patch.object(os, 'getenv', return_value=case[0]):
-                self.assertEquals(index.getKinesisURL(), case[1])
+                self.assertEquals(index.getKinesisName(), case[1])
 
 
 class TestPushToKinesis(unittest.TestCase):
