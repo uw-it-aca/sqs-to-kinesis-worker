@@ -3,7 +3,7 @@ import os
 import boto3
 
 sqs_client = boto3.client('sqs', region_name='us-west-2')
-kinesis_client = boto3.client('kinesis', region_name='us-west-2')
+kinesis_client = boto3.client('firehose', region_name='us-west-2')
 
 
 def handler(event, context):
@@ -46,9 +46,10 @@ def pollSQS():
 
 def pushToKinesis(event, stream_name):
     kinesis_client.put_record(
-        StreamName=stream_name,
-        Data=json.dumps(event),
-        PartitionKey='dummykey'
+        DeliveryStreamName=stream_name,
+        Record={
+            'Data' : json.dumps(event)
+        }
     )
 
 
