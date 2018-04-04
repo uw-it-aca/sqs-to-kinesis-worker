@@ -2,8 +2,8 @@ import json
 import os
 import boto3
 
-sqs_client = boto3.client('sqs')
-kinesis_client = boto3.client('kinesis')
+sqs_client = boto3.client('sqs', region_name='us-west-2')
+kinesis_client = boto3.client('kinesis', region_name='us-west-2')
 
 
 def handler(event, context):
