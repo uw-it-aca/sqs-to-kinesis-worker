@@ -58,4 +58,4 @@ def getSQSURL():
 
 
 def getKinesisName():
-    return os.getenv("KINESIS_URL")
+    return os.getenv("KINESIS_STREAM_NAME")
