@@ -10,7 +10,7 @@ kinesis_client = boto3.client('firehose', region_name='us-west-2')
 def handler(event, context):
 
     try:
-        lambda_end = time.time() + 240
+        lambda_end = time.time() + getLambdaRunTime()
 
         while time.time() < lambda_end:
             response = pollSQS()
@@ -85,3 +85,7 @@ def deleteSQSMessages(response):
         QueueUrl=getSQSURL(),
         Entries=entries
     )
+
+
+def getLambdaRunTime():
+    return int(os.getenv("EXECUTION_TIME"))
