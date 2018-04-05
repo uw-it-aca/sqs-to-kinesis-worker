@@ -10,11 +10,15 @@ kinesis_client = boto3.client('firehose', region_name='us-west-2')
 def handler(event, context):
 
     try:
-        lambda_end = time.time() + 60
+        lambda_end = time.time() + 240
 
         while time.time() < lambda_end:
             response = pollSQS()
             events = []
+
+            if 'Messages' not in response:
+                time.sleep(10)
+                continue
 
             for message in response['Messages']:
                 events.append(message['Body'])
