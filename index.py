@@ -5,10 +5,10 @@ import time
 
 sqs_client = boto3.client('sqs', region_name='us-west-2')
 kinesis_client = boto3.client('firehose', region_name='us-west-2')
+cloudwatch_client = boto3.client('cloudwatch', region_name='us-west-2')
 
 
 def handler(event, context):
-
     try:
         lambda_end = time.time() + getLambdaRunTime()
 
@@ -28,6 +28,18 @@ def handler(event, context):
 
             deleteSQSMessages(response)
 
+        if 'Records' in event and event['Records'][0][
+            'EventSource'] == 'aws:sns':
+            event_message = event['Records'][0]['Sns']['Message']
+            event_json = json.loads(event_message)
+            alarm_name = event_json['AlarmName']
+
+            response = cloudwatch_client.set_alarm_state(
+                AlarmName=alarm_name,
+                StateValue='OK',
+                StateReason='Resetting for another lambda trigger'
+            )
+
     except Exception as ex:
         return {
             'statusCode': 400,
@@ -37,7 +49,7 @@ def handler(event, context):
     return {
         'statusCode': 200,
         'body': 'Lambda execution terminated successfully'
-        }
+    }
 
 
 def pollSQS():
